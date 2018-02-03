@@ -14,33 +14,35 @@ namespace CandyMarket
 			var run = true;
 			while (run)
 			{
-				ConsoleKeyInfo userInput = MainMenu();
+				ConsoleKeyInfo userInput = MainMenu(db);
 
 				switch (userInput.KeyChar)
 				{
 					case '0':
 						run = false;
 						break;
-					case '1': // add candy to your bag
+					case '1':
 
-						// select a candy type
 						var selectedCandyType = AddNewCandyType(db);
 
+                        var amountToAdd = GetAmount("adding");
 						/** MORE DIFFICULT DATA MODEL
 						 * show a new menu to enter candy details
 						 * it would be convenient to show the menu in stages e.g. press enter to go to next detail stage, but write the whole screen again with responses populated so far.
 						 */
 
 						// if(moreDifficultDataModel) bug - this is passing candy type right now (which just increments in our DatabaseContext), but should also be passing candy details
-						db.SaveNewCandy(selectedCandyType.KeyChar);
+						db.SaveNewCandy(selectedCandyType.KeyChar, amountToAdd);
 						break;
 					case '2':
 
-                        var candyToEat = EatCandy(db);
+                        var candyToEat = SubtractCandyType(db, "eat");
                         /** eat candy
 						 * select a candy type
                          **/
-                        db.LoseCandy(candyToEat.KeyChar);
+                        var AmountToEat = GetAmount("eating");
+
+                        db.LoseCandy(candyToEat.KeyChar, AmountToEat);
 
                          /**
 						 * 
@@ -51,9 +53,10 @@ namespace CandyMarket
                         break;
 					case '3':
 
-                        var candyToToss = ThrowAwayCandyType(db);
+                        var candyToToss = SubtractCandyType(db, "get rid of");
+                        var amountToLose = GetAmount("throwing away");
 
-                        db.LoseCandy(candyToToss.KeyChar);
+                        db.LoseCandy(candyToToss.KeyChar, amountToLose);
 
                         /** throw away candy
 						 * select a candy type
@@ -65,6 +68,13 @@ namespace CandyMarket
 						 */
                         break;
 					case '4':
+
+                        var candyToGive = SubtractCandyType(db, "give up");
+                        var amountToGive = GetAmount("giving away");
+
+                        db.LoseCandy(candyToGive.KeyChar, amountToGive);
+                        //db.GiveToFriend(candyToGive.KeyChar, amountToGive);
+
 						/** give candy
 						 * feel free to hardcode your users. no need to create a whole UI to register users.
 						 * no one is impressed by user registration unless it's just amazingly fast & simple
@@ -76,6 +86,12 @@ namespace CandyMarket
 						 */
 						break;
 					case '5':
+
+                        var candyToTrade = SubtractCandyType(db, "offer up to trade");
+                        var amountToTrade = GetAmount("offering to trade");
+
+                        db.LoseCandy(candyToTrade.KeyChar, amountToTrade);
+                        //db.AddToTable(candyToTrade.KeyChar, amountToTrade);
 						/** trade candy
 						 * this is the next logical step. who wants to just give away candy forever?
 						 */
@@ -86,8 +102,6 @@ namespace CandyMarket
 			}
 		}
 
-
-
         static DatabaseContext SetupNewApp()
 		{
 			Console.Title = "Cross Confectioneries Incorporated";
@@ -95,24 +109,30 @@ namespace CandyMarket
 			var cSharp = 554;
 			var db = new DatabaseContext(tone: cSharp);
 
-			Console.SetWindowSize(60, 30);
-			Console.SetBufferSize(60, 30);
+			Console.SetWindowSize(60, 40);
+			Console.SetBufferSize(60, 40);
 			Console.BackgroundColor = ConsoleColor.White;
 			Console.ForegroundColor = ConsoleColor.Black;
 			return db;
 		}
 
-		static ConsoleKeyInfo MainMenu()
+		static ConsoleKeyInfo MainMenu(DatabaseContext db)
 		{
-			View mainMenu = new View()
-					.AddMenuOption("Did you just get some new candy? Add it here.")
-					.AddMenuOption("Do you want to eat some candy? Take it here.")
+            View mainMenu = new View()
+                    .AddMenuOption("Did you just get some new candy? Add it here.")
+                    .AddMenuOption("Do you want to eat some candy? Take it here.")
                     .AddMenuOption("Do you want to throw away the bad candy? Dump it here.")
                     .AddMenuOption("Feeling generous? Give away some candy here.")
                     .AddMenuOption("Looking to make a trade? Make an offer here.")
-                    .AddMenuText("Press 0 to exit.");
+                    .AddMenuText("Press 0 to exit.")
+                    .AddMenuText(db.ShowTaffyCount())
+                    .AddMenuText(db.ShowCandyCoatedCount())
+                    .AddMenuText(db.ShowChocolateBarCount())
+                    .AddMenuText(db.ShowZagnutCount());
 
-			Console.Write(mainMenu.GetFullMenu());
+
+            Console.Write(mainMenu.GetFullMenu());
+
 			ConsoleKeyInfo userOption = Console.ReadKey();
 			return userOption;
 		}
@@ -131,32 +151,34 @@ namespace CandyMarket
 			return selectedCandyType;
 		}
 
-        static ConsoleKeyInfo EatCandy(DatabaseContext db)
-        {
-            var candyTypes = db.GetCandyTypes();
-
-            var myCandyMenu = new View()
-                .AddMenuText("What type of candy do you want to eat?")
-                .AddMenuOptions(candyTypes)
-
-            Console.Write(myCandyMenu.GetFullMenu());
-
-            ConsoleKeyInfo selectedCandyType = Console.ReadKey();
-            return selectedCandyType;
-        }
-
-        static ConsoleKeyInfo ThrowAwayCandyType(DatabaseContext db)
+        static ConsoleKeyInfo SubtractCandyType(DatabaseContext db, string action)
         {
             var candyTypes = db.GetCandyTypes();
 
             var newCandyMenu = new View()
-                    .AddMenuText("What type of candy did you want to get rid of?")
-                    .AddMenuOptions(candyTypes);
+                    .AddMenuText($"What type of candy did you want to {action}?")
+                    .AddMenuOptions(candyTypes)
+                    .AddMenuText(db.ShowTaffyCount())
+                    .AddMenuText(db.ShowCandyCoatedCount())
+                    .AddMenuText(db.ShowChocolateBarCount())
+                    .AddMenuText(db.ShowZagnutCount());
 
             Console.Write(newCandyMenu.GetFullMenu());
 
             ConsoleKeyInfo selectedCandyType = Console.ReadKey();
             return selectedCandyType;
         }
+
+        static int GetAmount(string action)
+        {
+            var amountMenu = new View()
+                .AddMenuText($"How many are you {action}?");
+
+            Console.Write(amountMenu.GetFullMenu());
+
+            int selectedCandyAmount = int.Parse(Console.ReadLine());
+            return selectedCandyAmount;
+        }
+
     }
 }

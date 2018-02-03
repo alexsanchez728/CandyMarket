@@ -23,12 +23,12 @@ namespace CandyMarket
 		IList<string> _menuItems;
 		int itemNumber = 0;
 
-		internal View()
+        internal View()
 		{
 			_menuItems = new List<string> { companyName };
 		}
 
-		internal View AddMenuText(string text)
+        internal View AddMenuText(string text)
 		{
 			var menuText = $"{Environment.NewLine}{text}{Environment.NewLine}";
 			_menuItems.Add(menuText);
@@ -57,7 +57,7 @@ namespace CandyMarket
 		{
 			Console.Clear();
 			var menu = string.Join(Environment.NewLine, _menuItems);
-			return $"{menu}{Environment.NewLine}> ";
+			return $"{menu}{Environment.NewLine}";
 		}
-	}
+    }
 }
