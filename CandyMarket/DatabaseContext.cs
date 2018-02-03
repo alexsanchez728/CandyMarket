@@ -15,8 +15,8 @@ namespace CandyMarket
 		/**
 		 * this is just an example.
 		 * feel free to modify the definition of this collection "BagOfCandy" if you choose to implement the more difficult data model.
-		 * Dictionary<CandyType, List<Candy>> BagOfCandy { get; set; }
 		 */
+		 //Dictionary<CandyType, List<Candy>> BagOfCandy { get; set; }
 
 		public DatabaseContext(int tone) => Console.Beep(tone, 2500);
 
@@ -54,5 +54,31 @@ namespace CandyMarket
 					break;
 			}
 		}
-	}
+
+        internal void LoseCandy(char selectedCandy)
+        {
+            var candyOption = int.Parse(selectedCandy.ToString());
+
+            var maybeCandyMaybeNot = (CandyType)selectedCandy;
+            var forRealTheCandyThisTime = (CandyType)candyOption;
+
+            switch (forRealTheCandyThisTime)
+            {
+                case CandyType.TaffyNotLaffy:
+                    --_countOfTaffy;
+                    break;
+                case CandyType.CandyCoated:
+                    --_countOfCandyCoated;
+                    break;
+                case CandyType.CompressedSugar:
+                    --_countOfChocolateBar;
+                    break;
+                case CandyType.ZagnutStyle:
+                    --_countOfZagnut;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 }
