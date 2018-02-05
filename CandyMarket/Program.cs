@@ -23,16 +23,21 @@ namespace CandyMarket
 						break;
 					case '1':
 
-						var selectedCandyType = AddNewCandyType(db);
-
+                        var selectedCandyType = AddNewCandyType(db).KeyChar;
                         var amountToAdd = GetAmount("adding");
-						/** MORE DIFFICULT DATA MODEL
-						 * show a new menu to enter candy details
-						 * it would be convenient to show the menu in stages e.g. press enter to go to next detail stage, but write the whole screen again with responses populated so far.
-						 */
+                        var candyName = GetCandyName();
+                        var candyBrand = GetBrand();
+                        var candySize = GetSize();
 
-						// if(moreDifficultDataModel) bug - this is passing candy type right now (which just increments in our DatabaseContext), but should also be passing candy details
-						db.SaveNewCandy(selectedCandyType.KeyChar, amountToAdd);
+                        var newCandy = new Candy
+                        {
+                            BrandName = candyBrand,
+                            TypeOfCandy = selectedCandyType,
+                            HowMany = amountToAdd,
+                            Size = candySize
+                        };
+
+                        db.SaveNewCandy(candyName, newCandy);
 						break;
 					case '2':
 
@@ -180,5 +185,39 @@ namespace CandyMarket
             return selectedCandyAmount;
         }
 
+        static string GetBrand()
+        {
+            var brandMenu = new View()
+                .AddMenuText("What company makes this candy?")
+                .AddMenuText("Press [Enter] to continue.");
+
+            Console.Write(brandMenu.GetFullMenu());
+            string Brand = Console.ReadLine();
+            return Brand;
+        }
+
+        static string GetSize()
+        {
+
+            var sizeMenu = new View()
+                .AddMenuText("What size candy is it?")
+                .AddMenuText("For example: King sized, bite sized, regular.")
+                .AddMenuText("Press [Enter] to continue.");
+                
+            Console.Write(sizeMenu.GetFullMenu());
+            string size = Console.ReadLine();
+            return size;
+        }
+
+        static string GetCandyName()
+        {
+            var sizeMenu = new View()
+                .AddMenuText("What's the name of the candy?")
+                .AddMenuText("Press [Enter] to continue.");
+
+            Console.Write(sizeMenu.GetFullMenu());
+            string candyName = Console.ReadLine();
+            return candyName;
+        }
     }
 }

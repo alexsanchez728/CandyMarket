@@ -15,10 +15,17 @@ namespace CandyMarket
         /**
 		 * this is just an example.
 		 * feel free to modify the definition of this collection "BagOfCandy" if you choose to implement the more difficult data model.
+         * public Dictionary<CandyType, List<Candy>> BagOfCandy { get; set; }
 		 */
-        //Dictionary<CandyType, List<Candy>> BagOfCandy { get; set; }
 
-        public DatabaseContext(int tone) => Console.Beep(tone, 2500);
+        // Cause the key needs to be unique, the only thing the user is going to enter that is unique is the brandName of the candy
+        // So they can use the name of the candy to see the rest of the information about it
+        // In there will be the Candy's details
+        //      candyName   //details
+        Dictionary<string, Candy> BagOfCandy = new Dictionary<string, Candy>();
+
+
+        public DatabaseContext(int tone) => Console.Beep(tone, 1);
 
 		internal List<string> GetCandyTypes()
 		{
@@ -29,37 +36,45 @@ namespace CandyMarket
 				.ToList();
 		}
 
-		internal void SaveNewCandy(char selectedCandyMenuOption, int amount)
-		{
-			var candyOption = int.Parse(selectedCandyMenuOption.ToString());
+        internal CandyType ConvertOptionToType(char SelectedCandyMenuOption)
+        {
+			var candyOption = int.Parse(SelectedCandyMenuOption.ToString());
 
-			var maybeCandyMaybeNot = (CandyType)selectedCandyMenuOption;
 			var forRealTheCandyThisTime = (CandyType)candyOption;
+            return forRealTheCandyThisTime;
+        }
 
-			switch (forRealTheCandyThisTime)
+		internal void SaveNewCandy(string candyName, Candy details)
+		{
+
+            var candybyType = ConvertOptionToType(details.TypeOfCandy);
+
+            switch (candybyType)
 			{
 				case CandyType.TaffyNotLaffy:
-					_countOfTaffy += amount;
+					_countOfTaffy += details.HowMany;
 					break;
 				case CandyType.CandyCoated:
-					_countOfCandyCoated += amount;
+					_countOfCandyCoated += details.HowMany;
 					break;
 				case CandyType.CompressedSugar:
-					_countOfChocolateBar += amount;
+					_countOfChocolateBar += details.HowMany;
 					break;
 				case CandyType.ZagnutStyle:
-					_countOfZagnut += amount;
+					_countOfZagnut += details.HowMany;
 					break;
 				default:
 					break;
 			}
+
+            BagOfCandy.Add(candyName, details);
+
 		}
 
         internal void LoseCandy(char selectedCandy, int amount)
         {
             var candyOption = int.Parse(selectedCandy.ToString());
 
-            var maybeCandyMaybeNot = (CandyType)selectedCandy;
             var forRealTheCandyThisTime = (CandyType)candyOption;
 
             switch (forRealTheCandyThisTime)
